@@ -1,0 +1,88 @@
+---
+# role: jomrr.nexus_oss
+# file: tasks/main.yml
+
+- name: "Install openjdk for Debian"
+  ansible.builtin.package:
+    name: "openjdk-{{ nexus_java_version }}-jdk"
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: "Install openjdk for RedHat"
+  ansible.builtin.package:
+    name: "java-{{ nexus_java_version }}-openjdk"
+    state: present
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Ensure nexus home directory permissions
+  ansible.builtin.file:
+    path: "{{ nexus_home }}"
+    state: directory
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    mode: '0750'
+
+- name: Ensure nexus data directory exists
+  ansible.builtin.file:
+    path: "{{ nexus_data }}"
+    state: directory
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    mode: '0750'
+
+- name: "Ensure nexus group exists"
+  ansible.builtin.group:
+    name: "{{ nexus_group }}"
+    state: present
+
+- name: "Create nexus user"
+  ansible.builtin.user:
+    name: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    home: "{{ nexus_home }}"
+    shell: "/bin/bash"
+    system: true
+    state: present
+
+- name: "Download Nexus OSS"
+  ansible.builtin.get_url:
+    url: "{{ nexus_download_url }}"
+    dest: "/tmp/nexus.tar.gz"
+    mode: "0644"
+  register: nexus_download
+
+- name: "Extract Nexus OSS"
+  ansible.builtin.unarchive:
+    src: "/tmp/nexus.tar.gz"
+    dest: "{{ nexus_home }}"
+    remote_src: true
+    extra_opts: [--strip-components=1]
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+
+- name: "Create and enable systemd unit file"
+  ansible.builtin.template:
+    src: "nexus-oss.service.j2"
+    dest: "/etc/systemd/system/nexus-oss.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify: "Reload systemd and enable nexus-oss"
+
+- name: "Generate nexus.rc"
+  ansible.builtin.template:
+    src: "nexus.rc.j2"
+    dest: "{{ nexus_home }}/bin/nexus.rc"
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    mode: "0640"
+  notify: "Reload systemd and enable nexus-oss"
+
+- name: "Generate nexus.vmoptions"
+  ansible.builtin.template:
+    src: "nexus.vmoptions.j2"
+    dest: "{{ nexus_home }}/bin/nexus.vmoptions"
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    mode: "0640"
+  notify: "Reload systemd and enable nexus-oss"
