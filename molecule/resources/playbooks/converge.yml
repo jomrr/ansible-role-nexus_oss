@@ -1,0 +1,9 @@
+# role: jomrr.nexus_oss
+# file: molecule/resources/playbooks/converge.yml
+
+- name: "PLAYBOOK | Converge | nexus_oss"
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - role: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
