@@ -2,9 +2,12 @@
 # role: jomrr.nexus_oss
 # file: handlers/main.yml
 
-- name: "Reload systemd and enable nexus-oss"
+- name: "Reload systemd"
   ansible.builtin.systemd:
     daemon_reload: true
-    enabled: true
+
+- name: "Restart nexus-oss"
+  ansible.builtin.systemd:
+    name: "nexus-oss"
     state: restarted
-    name: nexus-oss
+    enabled: true

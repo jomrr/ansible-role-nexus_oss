@@ -28,21 +28,17 @@
     system: true
     state: present
 
-- name: Ensure nexus home directory permissions
+- name: "Ensure directories with correct permissions"
   ansible.builtin.file:
-    path: "{{ nexus_home }}"
+    path: "{{ item }}"
     state: directory
     owner: "{{ nexus_user }}"
     group: "{{ nexus_group }}"
     mode: '0750'
-
-- name: Ensure nexus data directory exists
-  ansible.builtin.file:
-    path: "{{ nexus_data }}"
-    state: directory
-    owner: "{{ nexus_user }}"
-    group: "{{ nexus_group }}"
-    mode: '0750'
+  loop:
+    - "{{ nexus_home }}"
+    - "{{ nexus_data }}"
+    - "{{ nexus_data }}/etc"
 
 - name: "Download Nexus OSS"
   ansible.builtin.get_url:
@@ -70,22 +66,17 @@
     owner: "root"
     group: "root"
     mode: "0644"
-  notify: "Reload systemd and enable nexus-oss"
+  notify: "Reload systemd"
 
-- name: "Generate nexus.rc"
+- name: "Generate nexus configuration files"
   ansible.builtin.template:
-    src: "nexus.rc.j2"
-    dest: "{{ nexus_home }}/bin/nexus.rc"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     owner: "{{ nexus_user }}"
     group: "{{ nexus_group }}"
     mode: "0640"
-  notify: "Reload systemd and enable nexus-oss"
-
-- name: "Generate nexus.vmoptions"
-  ansible.builtin.template:
-    src: "nexus.vmoptions.j2"
-    dest: "{{ nexus_home }}/bin/nexus.vmoptions"
-    owner: "{{ nexus_user }}"
-    group: "{{ nexus_group }}"
-    mode: "0640"
-  notify: "Reload systemd and enable nexus-oss"
+  notify: "Restart nexus-oss"
+  loop:
+    - { src: "nexus.properties.j2", dest: "{{ nexus_data }}/etc/nexus.properties" }
+    - { src: "nexus.rc.j2", dest: "{{ nexus_home }}/bin/nexus.rc" }
+    - { src: "nexus.vmoptions.j2", dest: "{{ nexus_home }}/bin/nexus.vmoptions" }
