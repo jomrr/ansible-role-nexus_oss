@@ -3,7 +3,7 @@
 # file: defaults/main.yml
 
 # https://help.sonatype.com/en/download-archives---repository-manager-3.html
-nexus_version: "3.70.0-03"
+nexus_version: "3.70.1-02"
 nexus_java_version: "11"
 nexus_user: "nexus"
 nexus_group: "nexus"
