@@ -4,7 +4,7 @@
 
 # https://help.sonatype.com/en/download-archives---repository-manager-3.html
 nexus_version: "3.70.0-03"
-nexus_java_version: "17"
+nexus_java_version: "11"
 nexus_user: "nexus"
 nexus_group: "nexus"
 nexus_listen_address: "127.0.0.1"
