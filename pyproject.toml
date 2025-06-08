@@ -4,7 +4,7 @@ version = "0.0.0"
 description = "Ansible role to set up Sonatype Nexus Repository OSS."
 authors = ["Jonas Mauer"]
 license = "MIT"
-keywords = []
+keywords = ["nexus", "repository"]
 repository = "https://github.com/jomrr/ansible-role-nexus_oss"
 
 [tool.commitizen]
@@ -15,6 +15,13 @@ commit_message = "build(release): version {version}"
 major_on_zero = false
 upload_to_pypi = false
 upload_to_vcs_release = true
-version_toml = [
-    "pyproject.toml:project.version",
-]
+version_toml = ["pyproject.toml:project.version"]
+
+[tool.tox]
+envlist = ["lint"]
+
+[tool.tox.env.lint]
+description = "Lint code"
+skip_install = true
+deps = ["ansible-lint"]
+commands = [["ansible-lint", "--offline"]]
