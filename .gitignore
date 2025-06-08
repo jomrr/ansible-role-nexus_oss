@@ -1,0 +1,13 @@
+# role: jomrr.nexus_oss
+# file: .gitignore
+
+__pycache__/
+!.gitkeep
+.ansible/
+.idea/
+.tox/
+.venv/
+.vscode/
+cache/
+collections/*
+dist/
